@@ -2,8 +2,8 @@
 #include <string>
 #include <chrono>//use to apply sleep function
 #include <thread>//use to apply sleep function
-#include <cstdlib>//use to create rendom number
-#include <ctime>//use to create rendom number
+#include <cstdlib>//use to create random number
+#include <ctime>//use to create random number
 using namespace std;
 
 struct Account {
@@ -52,7 +52,7 @@ class Bank {
             cout << "Enter Contact: ";
             cin >> contact;
 
-            cout << "Enter Addhar no.: ";
+            cout << "Enter Aadhar no.: ";
             cin >> addhar_no;
 
              string str_arr[] = {"Verification is under process"," ."," ."," ."," ."};
