@@ -1,9 +1,11 @@
 #include <iostream>
 #include <string>
-#include <chrono>//use to apply sleep function
-#include <thread>//use to apply sleep function
-#include <cstdlib>//use to create random number
-#include <ctime>//use to create random number
+#include <chrono>
+#include <thread>
+#include <vector>
+#include <cstdlib>
+#include <ctime>
+
 using namespace std;
 
 struct Account {
@@ -12,100 +14,69 @@ struct Account {
     long long int contact;
     long long int addhar_no;
     long long int account_no;
-    double balance=0;
-
-
+    double balance = 0;
 };
 
 class Bank {
-    private:
-        Account* customers[100];
-        int numCustomers;
+private:
+    vector<Account*> customers;
 
-    public:
-        Bank() {
-            numCustomers = 0;
+public:
+    Bank() {}
+
+    void createAccount() {
+        if (customers.size() >= 100) {
+            cout << "Maximum number of customers reached." << endl;
+            return;
         }
 
-        void crateAccount() {
-            if (numCustomers >= 100)
-            {
-                cout << "Maximum number of customers reached." << endl;
-                return;
-            }
+        string name, address;
+        long long int contact, addhar_no;
 
-            string name, address;
-            long long int contact,addhar_no;
-            // long long int account_no;
+        cout << "Enter the details correctly to create your account" << endl;
+        cout << "Enter Name: ";
+        cin.ignore();
+        getline(cin, name);
 
+        cout << "Enter address: ";
+        getline(cin, address);
 
-            // cout <<"Enter name: ";
-            cout<<"Enter the details correctly to create your account"<<endl;
-            cout << "Enter Name: ";
-            cin.ignore();
-            getline(cin, name);
+        cout << "Enter Contact: ";
+        cin >> contact;
 
-            cout << "Enter address: ";
-            cin.ignore();
-            getline(cin, address);
+        cout << "Enter Aadhar no.: ";
+        cin >> addhar_no;
 
-            cout << "Enter Contact: ";
-            cin >> contact;
+        // Code to create account no.
+        srand(time(nullptr)); // initialize random seed
+        long long int account_no = rand() % 1000000000000 + 1000000000000; // generate 11-digit number
+        cout << "\nYour account no. is : " << account_no << endl;
 
-            cout << "Enter Aadhar no.: ";
-            cin >> addhar_no;
+        customers.push_back(new Account{ name, address, contact, addhar_no, account_no });
 
-             string str_arr[] = {"Verification is under process"," ."," ."," ."," ."};
-              for (const string& str : str_arr)
-              {
-                cout << str ;
-                this_thread::sleep_for(chrono::seconds(1));
-               }
+        cout << "Your account is created successfully " << endl;
+    }
 
-             //    code to create account no.
-               srand(time(nullptr)); // initialize random seed
-               long long int account_no = rand() % 1000000000000 + 1000000000000; // generate 11-digit number
-               cout << "\nYour account no. is : " << account_no << endl << endl;
+    void updateAccount() {
+        string name;
+        long long int addhar_no;
+        cout << "Enter name of customer to update account: ";
+        cin.ignore();
+        getline(cin, name);
 
-              string str_arr1[] = {"Your account is created successfully "};
-              for (const string& str : str_arr1)
-              {
-                cout << str ;
-                this_thread::sleep_for(chrono::seconds(1));
-               }
-            customers[numCustomers] = new Account {name,address,contact,addhar_no,account_no};
-            numCustomers++;
-
-
-        }
-
-       void updateAccount()
-        {
-            string name;
-            long long int addhar_no;
-            cout << "Enter name of customer to update account: ";
-            cin.ignore();
-            getline(cin, name);
-            for (int i = 0; i < numCustomers; i++)
-            {
-                if (customers[i]->name == name)
-                {
-                    cout<<"Enter your addhar_no.";
-                    cin>>addhar_no;
-                    for(int i=0;i< numCustomers;i++)
-                    {
-                        if(customers[i]->addhar_no==addhar_no)
-                        {
-                            string address,name;
+        for (int i = 0; i < customers.size(); i++) {
+            if (customers[i]->name == name) {
+                cout << "Enter your addhar_no.";
+                cin >> addhar_no;
+                if (customers[i]->addhar_no == addhar_no) {
+                    string address, name;
                     double contact;
-                    cout<<"Enter new name: ";
+                    cout << "Enter new name: ";
                     cin.ignore();
                     getline(cin, name);
                     customers[i]->name = name;
 
-
                     cout << "Enter new address: ";
-                    cin.ignore();
                     getline(cin, address);
                     customers[i]->address = address;
 
@@ -115,200 +86,139 @@ class Bank {
 
                     cout << "Account updated successfully." << endl;
                     return;
-
-                        }
-                    }
-
-
                 }
             }
-
-            cout << "Customer not found." << endl;
         }
 
+        cout << "Customer not found." << endl;
+    }
 
+    void deposit() {
+        string name;
+        double amount;
 
-        void deposit() {
-    string name;
-    double amount;
+        cout << "Enter account holder name: ";
+        cin.ignore();
+        getline(cin, name);
 
-    cout << "Enter account holder name: ";
-    cin.ignore();
-    getline(cin, name);
+        for (int i = 0; i < customers.size(); i++) {
+            if (customers[i]->name == name) {
+                cout << "Enter amount to deposit: ";
+                cin >> amount;
 
-    for (int i = 0; i < numCustomers; i++) {
-         if (customers[i]->name == name) {
-            cout << "Enter amount to deposit: ";
-            cin >> amount;
+                customers[i]->balance += amount;
 
-           customers[i]->balance += amount;
+                loadingAnimation("Deposit successful!");
+                cout << "New balance is: " << customers[i]->balance << endl;
+                return;
+            }
+        }
 
-           string str_arr3[] = {"LOADING"," ."," ."," ."," ."};
-              for (const string& str : str_arr3)
-              {
-                cout << str ;
-                this_thread::sleep_for(chrono::seconds(1));
-               }
+        cout << "Account not found!" << endl;
+    }
 
-            cout << "\n\nDeposit successful!"<<"\n\nNew balance is: " << customers[i]->balance << endl;
+    void withdraw() {
+        string name;
+        double amount;
+
+        cout << "Enter account holder name: ";
+        cin.ignore();
+        getline(cin, name);
+
+        for (int i = 0; i < customers.size(); i++) {
+            if (customers[i]->name == name) {
+                cout << "Enter amount to withdraw: ";
+                cin >> amount;
+
+                if (amount > customers[i]->balance) {
+                    cout << "Insufficient Balance!" << endl;
+                    cout << "Your Current Balance is: " << customers[i]->balance << endl;
+                    return;
+                }
+
+                customers[i]->balance -= amount;
+
+                loadingAnimation("Withdrawal successful!");
+                cout << "New balance is: " << customers[i]->balance << endl;
+                return;
+            }
+        }
+
+        cout << "Account not found!" << endl;
+    }
+
+    void displayCustomers() {
+        if (customers.empty()) {
+            cout << "No customers added yet." << endl;
             return;
         }
+
+        cout << "Customers:" << endl;
+        for (const auto& customer : customers) {
+            cout << "Name: " << customer->name << endl;
+            cout << "Address: " << customer->address << endl;
+            cout << "Contact: " << customer->contact << endl;
+            cout << "Addhar No.: " << customer->addhar_no << endl;
+            cout << "Account No.: " << customer->account_no << endl;
+            cout << "Balance: " << customer->balance << endl;
+            cout << endl;
+        }
     }
 
-    cout << "Account not found!" << endl;
-}
-
-// Function to withdraw money from account
-void withdraw() {
-    string name;
-    double amount;
-
-    cout << "Enter account holder name: ";
-    cin.ignore();
-    getline(cin, name);
-
-    for (int i = 0; i <numCustomers; i++)
-     {
-        if (customers[i]->name == name)
-       {
-            cout << "Enter amount to withdraw: ";
-            cin >> amount;
-
-            if (amount > customers[i]->balance) {
-                cout << "Insufficient Balance!" << endl;
-                cout<<"Your Current Balance is: "<<customers[i]->balance;
-                return;
-            }
-
-            customers[i]->balance -= amount;
-
-            string str_arr4[] = {"LOADING"," ."," ."," ."};
-              for (const string& str : str_arr4)
-              {
-                cout << str ;
-                this_thread::sleep_for(chrono::seconds(1));
-               }
-
-            cout << "\n\nWithdrawal successful! "<<"\n\nNew balance is: " << customers[i]->balance << endl;
-
-
+    void loadingAnimation(const string& message) {
+        cout << "LOADING";
+        for (int i = 0; i < 4; i++) {
+            cout << ".";
+            this_thread::sleep_for(chrono::milliseconds(500));
         }
-        else
-        {
-            cout << "Account not found!" << endl;
-        }
-
+        cout << endl << message << endl;
     }
-
-
-}
-         void displayCustomers()
-       {
-            if (numCustomers == 0)
-            {
-                cout << "No customers added yet." << endl;
-                return;
-            }
-
-            cout << "Customers:" << endl;
-            for (int i = 0; i < numCustomers; i++)
-             {
-                cout << "Name: " << customers[i]->name << endl;
-                cout << "Address: " << customers[i]->address << endl;
-                cout << "Contact: " << customers[i]->contact  << endl;
-                cout << "Addhar No.: " << customers[i]->addhar_no<< endl;
-                cout << "Account No.: " << customers[i]->account_no << endl;
-                cout << "Balance: " << customers[i]->balance<< endl;
-                cout << endl;
-            }
-        }
 };
 
-int main()
- {
+int main() {
     Bank bank;
-    int choice;
-    int i;
-    for(i=0;i<=118;i++)
-    {
-    cout<<"*";
-    }
-    cout<<"*\n*";
-    for(i=0;i<35;i++)
-    {
-        cout<<" ";
-    }
-    cout<<"Programming Technogies And Tool Laboratory - II";
-    for(i=0;i<=35;i++)
-    {
-        cout<<" ";
-    }
-    cout<<"*\n*";
-    for(i=0;i<=46;i++)
-    {
-        cout<<" ";
-    }
-     cout<<"BANK MANAGEMENET SYSTEM ";
 
-    for(i=0;i<=46;i++)
-    {
-        cout<<" ";
-    }
-    cout<<"*";
-    for(i=0;i<=118;i++)
-    {
-    cout<<"*";
-    }
-
-    cout<<endl<<endl;
-
+    cout << "******************************************************" << endl;
+    cout << "*                  Programming Technogies            *" << endl;
+    cout << "*         And Tool Laboratory - II                   *" << endl;
+    cout << "*                 BANK MANAGEMENT SYSTEM             *" << endl;
+    cout << "******************************************************" << endl << endl;
 
     while (true) {
-
-        for(i=0;i<=118;i++)
-    {
-    cout<<"*";
-    }
-        cout << "\nEnter 1 to create account." << endl;
-        cout << "Enter 2 to update account." << endl;
+        cout << "Enter 1 to create an account." << endl;
+        cout << "Enter 2 to update an account." << endl;
         cout << "Enter 3 to withdraw money." << endl;
-        cout << "Enter 4 to deposit money" << endl;
-        cout << "Enter 5 to display customers" << endl;
+        cout << "Enter 4 to deposit money." << endl;
+        cout << "Enter 5 to display customers." << endl;
         cout << "Enter 6 to exit." << endl;
 
-         for(i=0;i<=119;i++)
-    {
-    cout<<"*";
-    }
-
-        cout<<"\nEnter Your Choice: ";
+        int choice;
+        cout << "\nEnter Your Choice: ";
         cin >> choice;
 
-        switch(choice)
-        {
-            case 1:
-                bank.crateAccount();
-                break;
-            case 2:
-                bank.updateAccount();
-                break;
-            case 3:
-                bank.withdraw();
-
-                break;
-            case 4:
-                bank.deposit();
-                break;
-            case 5:
-                bank.displayCustomers();
-               break;
-            case 6:
-                cout<<"exiting program";
-                return 0;
-            default:
-                cout << "Invalid choice. Please try again." << endl;
+        switch (choice) {
+        case 1:
+            bank.createAccount();
+            break;
+        case 2:
+            bank.updateAccount();
+            break;
+        case 3:
+            bank.withdraw();
+            break;
+        case 4:
+            bank.deposit();
+            break;
+        case 5:
+            bank.displayCustomers();
+            break;
+        case 6:
+            cout << "Exiting program.";
+            return 0;
+        default:
+            cout << "Invalid choice. Please try again." << endl;
         }
 
-        cout<<endl;
+        cout << endl;
     }
 }
